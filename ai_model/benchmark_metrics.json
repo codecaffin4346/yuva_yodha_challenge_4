@@ -1,0 +1,22 @@
+{
+  "RandomForest": {
+    "R2_Score": 0.9934,
+    "MAE": 0.000448,
+    "MSE": 1e-06
+  },
+  "GradientBoosting": {
+    "R2_Score": 0.987,
+    "MAE": 0.000384,
+    "MSE": 2e-06
+  },
+  "NeuralNetwork": {
+    "R2_Score": -4463.5177,
+    "MAE": 0.786405,
+    "MSE": 0.828112
+  },
+  "LinearRegression": {
+    "R2_Score": 0.9654,
+    "MAE": 0.002144,
+    "MSE": 6e-06
+  }
+}

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yuva Yodha Tech - Challenge 4: Smart Manufacturing SCADA Twin</title>
+    <!-- FontAwesome & Google Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-icon"><i class="fa-solid fa-cube"></i></div>
+                <div class="brand-text">
+                    <h2>Yuva Yodha SCADA</h2>
+                    <span>Digital Twin • Challenge 4</span>
+                </div>
+            </div>
+
+            <nav class="nav-menu">
+                <a href="#overview" class="nav-item active"><i class="fa-solid fa-chart-line"></i> Virtual Telemetry</a>
+                <a href="#schematic" class="nav-item"><i class="fa-solid fa-diagram-project"></i> P&ID Process Diagram</a>
+                <a href="#ai-predictor" class="nav-item"><i class="fa-solid fa-brain"></i> AI Energy Optimizer</a>
+                <a href="#roi-calculator" class="nav-item"><i class="fa-solid fa-calculator"></i> Sustainability ROI</a>
+                <a href="#maintenance" class="nav-item"><i class="fa-solid fa-gears"></i> Predictive Maintenance</a>
+                <a href="#scenarios" class="nav-item"><i class="fa-solid fa-flask"></i> Fault Scenarios</a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="sys-status">
+                    <span class="status-dot green"></span>
+                    <div class="status-info">
+                        <span class="status-title">Mode</span>
+                        <span class="status-val text-green">Pure Software Simulator</span>
+                    </div>
+                </div>
+                <div class="sys-status">
+                    <span class="status-dot green"></span>
+                    <div class="status-info">
+                        <span class="status-title">Schneider EcoStruxure</span>
+                        <span class="status-val">Aligned (ISO 50001)</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Top Header Bar -->
+            <header class="top-header">
+                <div class="header-title">
+                    <h1>Industrial Process Digital Twin & AI SCADA Simulator</h1>
+                    <p>Open-Source IIoT Architecture • Schneider Electric Yuva Yodha Tech 2026</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-accent" id="btnAutoOptimize">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> AI Auto-Optimize Setpoint
+                    </button>
+                    <button class="btn btn-outline" id="btnExportCSV">
+                        <i class="fa-solid fa-file-csv"></i> Export SCADA Report
+                    </button>
+                    <button class="btn btn-primary" id="btnEstop">
+                        <i class="fa-solid fa-triangle-exclamation"></i> Emergency Stop
+                    </button>
+                    <div class="time-badge" id="liveClock">00:00:00</div>
+                </div>
+            </header>
+
+            <!-- Scenario Selection Bar -->
+            <section class="scenario-bar" id="scenarios">
+                <span class="scenario-label"><i class="fa-solid fa-vial"></i> Industrial Plant Scenario Presets:</span>
+                <div class="scenario-buttons">
+                    <button class="btn-scenario active" data-scenario="NORMAL">
+                        <i class="fa-solid fa-circle-check text-green"></i> Normal Steady-State
+                    </button>
+                    <button class="btn-scenario" data-scenario="OVERHEATING">
+                        <i class="fa-solid fa-temperature-arrow-up text-amber"></i> Thermal Overheating Fault
+                    </button>
+                    <button class="btn-scenario" data-scenario="MOTOR_ANOMALY">
+                        <i class="fa-solid fa-gear text-red"></i> Motor Bearing Wear (Vibration)
+                    </button>
+                    <button class="btn-scenario" data-scenario="COLD_WEATHER">
+                        <i class="fa-solid fa-snowflake text-cyan"></i> Sub-Zero Ambient Weather
+                    </button>
+                </div>
+            </section>
+
+            <!-- Key Metric Cards -->
+            <section class="metrics-grid">
+                <div class="metric-card">
+                    <div class="card-icon proc-temp"><i class="fa-solid fa-temperature-high"></i></div>
+                    <div class="card-data">
+                        <span class="card-label">Virtual Process Temp</span>
+                        <h3 id="valProcTemp">59.8 °C</h3>
+                        <span class="card-sub text-green" id="subProcTemp"><i class="fa-solid fa-circle-check"></i> Nominal Thermal State</span>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="card-icon env-temp"><i class="fa-solid fa-cloud-sun"></i></div>
+                    <div class="card-data">
+                        <span class="card-label">Ambient / Env Temp</span>
+                        <h3 id="valEnvTemp">12.0 °C</h3>
+                        <span class="card-sub text-muted">Virtual Meteorological Node</span>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="card-icon current"><i class="fa-solid fa-bolt-lightning"></i></div>
+                    <div class="card-data">
+                        <span class="card-label">Motor Load & Current</span>
+                        <h3 id="valCurrent">3.54 A</h3>
+                        <span class="card-sub text-green" id="subCurrent">230V AC Baseline</span>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="card-icon energy"><i class="fa-solid fa-leaf"></i></div>
+                    <div class="card-data">
+                        <span class="card-label">Predicted Energy (AI)</span>
+                        <h3 id="valEnergy">0.230 kWh</h3>
+                        <span class="card-sub text-cyan" id="valCO2"><i class="fa-solid fa-leaf"></i> 0.188 kg CO₂/hr</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Industrial P&ID Process Schematic -->
+            <section class="panel schematic-panel" id="schematic">
+                <div class="panel-header">
+                    <h2><i class="fa-solid fa-diagram-project"></i> Interactive P&ID Industrial Process Schematic</h2>
+                    <span class="badge badge-live">ANIMATED DIGITAL TWIN</span>
+                </div>
+                <div class="pid-container">
+                    <div class="pid-node tank-node">
+                        <div class="tank-fluid" id="tankFluid" style="height: 65%; background: linear-gradient(to top, #F59E0B, #EF4444);"></div>
+                        <div class="tank-label">
+                            <i class="fa-solid fa-flask-vial"></i>
+                            <span>Process Reactor Tank</span>
+                            <strong id="pidTankTemp">59.8 °C</strong>
+                        </div>
+                    </div>
+                    <div class="pid-pipe pipe-horizontal">
+                        <div class="flow-animation"></div>
+                    </div>
+                    <div class="pid-node pump-node">
+                        <i class="fa-solid fa-compact-disc animate-spin" id="pidPumpIcon"></i>
+                        <span>Recirculation Pump</span>
+                        <small id="pidCurrentVal">3.54 A</small>
+                    </div>
+                    <div class="pid-pipe pipe-horizontal">
+                        <div class="flow-animation"></div>
+                    </div>
+                    <div class="pid-node cooler-node">
+                        <i class="fa-solid fa-fan animate-spin"></i>
+                        <span>Cooling Jacket</span>
+                        <span class="text-cyan" id="pidCoolerStatus">ACTIVE</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Main Charts & AI Section -->
+            <div class="content-grid">
+                <!-- Left: Telemetry Chart -->
+                <div class="panel chart-panel" id="overview">
+                    <div class="panel-header">
+                        <h2><i class="fa-solid fa-chart-area"></i> Virtual SCADA Telemetry Stream</h2>
+                        <div class="chart-controls">
+                            <span class="badge badge-live"><i class="fa-solid fa-record-vinyl animate-pulse"></i> LIVE SIMULATED STREAM</span>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="scadaChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Right: AI Energy Optimizer Interactive Panel -->
+                <div class="panel ai-panel" id="ai-predictor">
+                    <div class="panel-header">
+                        <h2><i class="fa-solid fa-brain"></i> AI Predictive Energy Engine</h2>
+                        <span class="badge badge-ai">Random Forest ($R^2 = 0.9934$)</span>
+                    </div>
+                    
+                    <div class="ai-controls">
+                        <div class="input-group">
+                            <div class="label-row">
+                                <label for="rangeProcTemp">Process Temp (°C)</label>
+                                <span class="val-display" id="dispProcTemp">60.0 °C</span>
+                            </div>
+                            <input type="range" id="rangeProcTemp" min="40" max="95" step="0.5" value="60">
+                        </div>
+
+                        <div class="input-group">
+                            <div class="label-row">
+                                <label for="rangeEnvTemp">Environmental Temp (°C)</label>
+                                <span class="val-display" id="dispEnvTemp">12.0 °C</span>
+                            </div>
+                            <input type="range" id="rangeEnvTemp" min="-15" max="45" step="0.5" value="12">
+                        </div>
+
+                        <div class="ai-output-box">
+                            <div class="output-row">
+                                <span>Estimated Power Demand:</span>
+                                <h3 id="predictedEnergyVal">0.234 kWh</h3>
+                            </div>
+                            <div class="output-row">
+                                <span>Hourly Carbon Emissions:</span>
+                                <span class="text-green" id="predictedCO2Val">0.191 kg CO₂</span>
+                            </div>
+                            <div class="ai-recommendation">
+                                <i class="fa-solid fa-lightbulb"></i>
+                                <span id="aiAdviceText">Operating at optimal thermal efficiency. Target baseline energy maintained.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Financial ROI & Predictive Maintenance Section -->
+            <div class="content-grid bottom-grid">
+                <!-- Sustainability & Financial ROI Calculator -->
+                <div class="panel" id="roi-calculator">
+                    <div class="panel-header">
+                        <h2><i class="fa-solid fa-coins"></i> Sustainability & Financial ROI Impact</h2>
+                        <span class="badge badge-ai">Schneider EcoStruxure</span>
+                    </div>
+                    <div class="roi-metrics">
+                        <div class="roi-box">
+                            <span class="roi-label">Annual Power Savings</span>
+                            <h3 class="text-green">₹ 1,48,200 / yr</h3>
+                            <small>Based on ₹8.50 / kWh tariff</small>
+                        </div>
+                        <div class="roi-box">
+                            <span class="roi-label">Annual Carbon Offset</span>
+                            <h3 class="text-cyan">14.28 t CO₂</h3>
+                            <small>Grid emission factor: 0.82 kg/kWh</small>
+                        </div>
+                        <div class="roi-box">
+                            <span class="roi-label">Est. System Payback</span>
+                            <h3 class="text-amber">4.2 Months</h3>
+                            <small>Open-source architecture vs SCADA</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Predictive Maintenance (RUL) -->
+                <div class="panel" id="maintenance">
+                    <div class="panel-header">
+                        <h2><i class="fa-solid fa-gears"></i> Predictive Maintenance (RUL)</h2>
+                    </div>
+                    <div class="maint-box">
+                        <div class="maint-row">
+                            <span>Vibration Index:</span>
+                            <strong id="valVibration">0.8 mm/s</strong>
+                        </div>
+                        <div class="maint-row">
+                            <span>Motor Bearing Health:</span>
+                            <strong class="text-green" id="valBearingHealth">96% (Good)</strong>
+                        </div>
+                        <div class="maint-row">
+                            <span>Remaining Useful Life (RUL):</span>
+                            <strong id="valRUL">4,120 Hours</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
