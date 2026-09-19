@@ -1,5 +1,5 @@
 # ⚡ Smart Industrial Process Digital Twin & SCADA Simulator
-### **Schneider Electric Yuva Yodha Tech Hackathon 2026 — Challenge 4 Submission (Grand Prize Grade)**
+### **Schneider Electric Yuva Yodha Tech Hackathon 2026 — Challenge 4 Submission**
 
 ![SCADA Digital Twin](dashboard/index.html)
 
