@@ -27,9 +27,11 @@
                 <a href="#overview" class="nav-item active"><i class="fa-solid fa-chart-line"></i> Virtual Telemetry</a>
                 <a href="#schematic" class="nav-item"><i class="fa-solid fa-diagram-project"></i> P&ID Process Diagram</a>
                 <a href="#ai-predictor" class="nav-item"><i class="fa-solid fa-brain"></i> AI Energy Optimizer</a>
+                <a href="#topology" class="nav-item"><i class="fa-solid fa-network-wired"></i> System Architecture</a>
+                <a href="#control" class="nav-item"><i class="fa-solid fa-sliders"></i> Edge Relay Control</a>
                 <a href="#roi-calculator" class="nav-item"><i class="fa-solid fa-calculator"></i> Sustainability ROI</a>
                 <a href="#maintenance" class="nav-item"><i class="fa-solid fa-gears"></i> Predictive Maintenance</a>
-                <a href="#scenarios" class="nav-item"><i class="fa-solid fa-flask"></i> Fault Scenarios</a>
+                <a href="#logs" class="nav-item"><i class="fa-solid fa-list-check"></i> SCADA Audit Logs</a>
             </nav>
 
             <div class="sidebar-footer">
@@ -221,6 +223,77 @@
                 </div>
             </div>
 
+            <!-- Architecture & Edge Control Grid -->
+            <div class="content-grid bottom-grid">
+                <!-- System Architecture Diagram -->
+                <div class="panel" id="topology">
+                    <div class="panel-header">
+                        <h2><i class="fa-solid fa-sitemap"></i> System Architecture (IIoT SCADA Topology)</h2>
+                        <span class="badge badge-ai">Open-Source Framework</span>
+                    </div>
+                    <div class="arch-diagram">
+                        <div class="arch-layer">
+                            <div class="layer-title"><i class="fa-solid fa-cube"></i> Virtual Sensing Layer</div>
+                            <div class="arch-box highlight">Python Telemetry Engine</div>
+                            <div class="arch-box">Virtual DS18B20 Temp Probe</div>
+                            <div class="arch-box">Virtual ACS712 Current Transducer</div>
+                        </div>
+                        <div class="arch-arrow"><i class="fa-solid fa-arrow-right"></i> Virtual MQTT (1883)</div>
+                        <div class="arch-layer">
+                            <div class="layer-title"><i class="fa-solid fa-server"></i> Edge Control Layer</div>
+                            <div class="arch-box highlight">Node-RED Flow Pipeline</div>
+                            <div class="arch-box">Automated Rules & Relays</div>
+                            <div class="arch-box">InfluxDB Time-Series DB</div>
+                        </div>
+                        <div class="arch-arrow"><i class="fa-solid fa-arrow-right"></i> REST / WebSockets</div>
+                        <div class="arch-layer">
+                            <div class="layer-title"><i class="fa-solid fa-laptop-code"></i> Application Layer</div>
+                            <div class="arch-box">Scikit-Learn ML Model</div>
+                            <div class="arch-box">SCADA Digital Twin UI</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Edge Relay Actuators -->
+                <div class="panel" id="control">
+                    <div class="panel-header">
+                        <h2><i class="fa-solid fa-toggle-on"></i> Edge Relay & Actuator Control</h2>
+                    </div>
+                    <div class="relays-grid">
+                        <div class="relay-card">
+                            <div class="relay-info">
+                                <i class="fa-solid fa-fan"></i>
+                                <span>Cooling Fan Relay</span>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="switchFan" checked>
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                        <div class="relay-card">
+                            <div class="relay-info">
+                                <i class="fa-solid fa-fire"></i>
+                                <span>Heating Element Relay</span>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="switchHeater">
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                        <div class="relay-card">
+                            <div class="relay-info">
+                                <i class="fa-solid fa-bell"></i>
+                                <span>Alarm Siren Relay</span>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="switchAlarm">
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Financial ROI & Predictive Maintenance Section -->
             <div class="content-grid bottom-grid">
                 <!-- Sustainability & Financial ROI Calculator -->
@@ -269,6 +342,30 @@
                     </div>
                 </div>
             </div>
+
+            <!-- SCADA Audit Logs Section -->
+            <section class="panel logs-panel" id="logs">
+                <div class="panel-header">
+                    <h2><i class="fa-solid fa-list-check"></i> Real-Time SCADA Audit & Event Logs</h2>
+                    <span class="badge badge-live">LIVE EVENT STREAM</span>
+                </div>
+                <div class="logs-container">
+                    <table class="logs-table">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Category</th>
+                                <th>Event Description</th>
+                                <th>Source Node</th>
+                                <th>Severity</th>
+                            </tr>
+                        </thead>
+                        <tbody id="auditLogsBody">
+                            <!-- Dynamic log entries populated by app.js -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
         </main>
     </div>
 

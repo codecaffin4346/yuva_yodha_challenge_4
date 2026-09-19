@@ -7,6 +7,22 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(updateClock, 1000);
     updateClock();
 
+    // Sidebar Smooth Scrolling & Active State Highlight
+    const navItems = document.querySelectorAll('.nav-item');
+    navItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            navItems.forEach(n => n.classList.remove('active'));
+            item.classList.add('active');
+
+            const targetId = item.getAttribute('href');
+            const targetSection = document.querySelector(targetId);
+            if (targetSection) {
+                targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    });
+
     // Chart initialization
     const ctx = document.getElementById('scadaChart').getContext('2d');
     const scadaChart = new Chart(ctx, {
@@ -121,9 +137,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // AI Auto-Optimize Button
     const btnAutoOptimize = document.getElementById('btnAutoOptimize');
     btnAutoOptimize.addEventListener('click', () => {
-        // Find optimal thermal setpoint
         rangeProc.value = 54.5;
         updateAIPredictor();
+        addAuditLog("AI_OPTIMIZER", "Tuned Process Temp to 54.5°C (-16.5% Energy)", "Scikit-Learn ML", "SUCCESS");
         alert('AI Closed-Loop Optimizer Applied:\nProcess Temperature setpoint automatically tuned to 54.5°C.\nEstimated Power Reduction: 16.5% saved!');
     });
 
@@ -139,8 +155,42 @@ document.addEventListener('DOMContentLoaded', () => {
             scenarioBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             activeScenario = btn.getAttribute('data-scenario');
+            addAuditLog("SCENARIO_CHANGE", `Preset switched to ${activeScenario}`, "User Dashboard", "INFO");
         });
     });
+
+    // SCADA Audit Logs Engine
+    const auditLogsBody = document.getElementById('auditLogsBody');
+    const logsHistory = [];
+
+    function addAuditLog(category, description, source, severity) {
+        const timestamp = new Date().toLocaleTimeString().split(' ')[0];
+        logsHistory.unshift({ timestamp, category, description, source, severity });
+
+        if (logsHistory.length > 15) logsHistory.pop();
+
+        let html = '';
+        logsHistory.forEach(log => {
+            let badgeClass = 'badge-info';
+            if (log.severity === 'WARNING') badgeClass = 'badge-warning';
+            if (log.severity === 'CRITICAL') badgeClass = 'badge-danger';
+            if (log.severity === 'SUCCESS') badgeClass = 'badge-success';
+
+            html += `<tr>
+                <td>${log.timestamp}</td>
+                <td><strong>${log.category}</strong></td>
+                <td>${log.description}</td>
+                <td>${log.source}</td>
+                <td><span class="${badgeClass}">${log.severity}</span></td>
+            </tr>`;
+        });
+        auditLogsBody.innerHTML = html;
+    }
+
+    // Initial Logs
+    addAuditLog("SYSTEM_INIT", "SCADA Digital Twin Simulator Initialized", "Python Telemetry Node", "SUCCESS");
+    addAuditLog("MQTT_BROKER", "Connected to Broker (172.20.10.7:1883)", "Node-RED Edge", "INFO");
+    addAuditLog("ML_ENGINE", "Random Forest Model Loaded (R^2 = 99.34%)", "Scikit-Learn", "SUCCESS");
 
     function addTelemetryPoint() {
         if (!isSimulating) return;
@@ -172,6 +222,9 @@ document.addEventListener('DOMContentLoaded', () => {
             rulHours = 2450;
             document.getElementById('subProcTemp').innerHTML = `<i class="fa-solid fa-triangle-exclamation text-amber"></i> High Thermal Load Alert`;
             document.getElementById('subCurrent').textContent = "Overload Current Draw";
+            if (timeIndex % 5 === 0) {
+                addAuditLog("THERMAL_ALERT", `High Process Temp (${procTemp.toFixed(1)}°C) - Fan Actuated`, "Node-RED Safety Rule", "WARNING");
+            }
         }
         else if (activeScenario === 'MOTOR_ANOMALY') {
             procTemp = 68.0 + (Math.random() - 0.5) * 1.0;
@@ -182,6 +235,9 @@ document.addEventListener('DOMContentLoaded', () => {
             rulHours = 180;
             document.getElementById('subProcTemp').innerHTML = `<i class="fa-solid fa-triangle-exclamation text-red"></i> Bearing Friction Heat`;
             document.getElementById('subCurrent').textContent = "CRITICAL Motor Current Spike!";
+            if (timeIndex % 4 === 0) {
+                addAuditLog("BEARING_ANOMALY", `Vibration ${vibration.toFixed(1)} mm/s Exceeds Threshold`, "Predictive Maintenance", "CRITICAL");
+            }
         }
         else if (activeScenario === 'COLD_WEATHER') {
             procTemp = 54.0 + Math.sin(timeIndex * 0.2) * 2.0;
@@ -197,7 +253,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const energy = predictEnergy(procTemp, envTemp, current);
         const co2 = energy * 0.82;
 
-        // Save to export history
         telemetryHistory.push({
             Timestamp: timeStr,
             Scenario: activeScenario,
@@ -207,6 +262,11 @@ document.addEventListener('DOMContentLoaded', () => {
             EnergyCon: energy.toFixed(3),
             CO2_Emissions: co2.toFixed(3)
         });
+
+        // Periodic telemetry log entry
+        if (timeIndex % 6 === 0) {
+            addAuditLog("TELEMETRY", `ProcTemp=${procTemp.toFixed(1)}°C, Current=${current.toFixed(2)}A, kWh=${energy.toFixed(3)}`, "Virtual SCADA Node", "INFO");
+        }
 
         // Update UI Metrics
         document.getElementById('valProcTemp').textContent = `${procTemp.toFixed(1)} °C`;
@@ -273,10 +333,12 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+        addAuditLog("CSV_EXPORT", "SCADA Audit Telemetry Log Exported to CSV", "User Dashboard", "SUCCESS");
     });
 
     const btnEstop = document.getElementById('btnEstop');
     btnEstop.addEventListener('click', () => {
+        addAuditLog("EMERGENCY_STOP", "E-STOP Triggered! Relays Shut Down", "User Console", "CRITICAL");
         alert('EMERGENCY STOP ACTIVATED!\nVirtual MQTT Event Published: SYSTEM_OFF, FAN_RELAY_OFF, HEATER_RELAY_OFF.');
     });
 });
