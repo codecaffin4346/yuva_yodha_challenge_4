@@ -7,6 +7,110 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(updateClock, 1000);
     updateClock();
 
+    // Floating Toast Notification Engine
+    const toastContainer = document.getElementById('toastContainer');
+    let soundMuted = false;
+
+    function showToast(title, message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `toast-card toast-${type}`;
+
+        let iconClass = 'fa-info-circle';
+        if (type === 'success') iconClass = 'fa-check-circle';
+        if (type === 'warning') iconClass = 'fa-exclamation-triangle';
+        if (type === 'danger') iconClass = 'fa-circle-xmark';
+
+        toast.innerHTML = `
+            <i class="fa-solid ${iconClass} toast-icon"></i>
+            <div class="toast-content">
+                <div class="toast-title">${title}</div>
+                <div class="toast-msg">${message}</div>
+            </div>
+        `;
+
+        toastContainer.appendChild(toast);
+        playAlarmSound(type);
+
+        // Native Desktop Notification if granted
+        if (typeof Notification !== 'undefined' && Notification.permission === 'granted' && (type === 'warning' || type === 'danger')) {
+            new Notification(`[SCADA Alert] ${title}`, { body: message, icon: 'https://cdn-icons-png.flaticon.com/512/564/564619.png' });
+        }
+
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(50px)';
+            toast.style.transition = 'all 0.3s ease';
+            setTimeout(() => toast.remove(), 300);
+        }, 4000);
+    }
+
+    // Web Audio Synthesizer Alarm Chime
+    function playAlarmSound(type) {
+        if (soundMuted || (type !== 'warning' && type !== 'danger')) return;
+        try {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (!AudioCtx) return;
+            const audioCtx = new AudioCtx();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+
+            osc.type = type === 'danger' ? 'sawtooth' : 'sine';
+            osc.frequency.setValueAtTime(type === 'danger' ? 880 : 587, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.25);
+        } catch (e) {
+            // Audio context fallback
+        }
+    }
+
+    // Sound Toggle Button
+    const btnSoundToggle = document.getElementById('btnSoundToggle');
+    const soundIcon = document.getElementById('soundIcon');
+
+    btnSoundToggle.addEventListener('click', () => {
+        soundMuted = !soundMuted;
+        soundIcon.className = soundMuted ? 'fa-solid fa-volume-xmark text-muted' : 'fa-solid fa-volume-high text-cyan';
+        showToast("Audio Alerts", soundMuted ? "SCADA Alarm Siren Muted" : "SCADA Alarm Siren Unmuted", soundMuted ? "warning" : "info");
+    });
+
+    // Notification Channel Action Buttons
+    const btnEnableDesktopNotif = document.getElementById('btnEnableDesktopNotif');
+    if (btnEnableDesktopNotif) {
+        btnEnableDesktopNotif.addEventListener('click', () => {
+            if (typeof Notification !== 'undefined') {
+                Notification.requestPermission().then(permission => {
+                    if (permission === 'granted') {
+                        showToast("Desktop Popups", "Native Browser Notifications Enabled!", "success");
+                    } else {
+                        showToast("Desktop Popups", "Browser Notification Permission Denied", "warning");
+                    }
+                });
+            } else {
+                showToast("Desktop Popups", "Browser does not support native notifications", "warning");
+            }
+        });
+    }
+
+    const btnTestEmailAlert = document.getElementById('btnTestEmailAlert');
+    if (btnTestEmailAlert) {
+        btnTestEmailAlert.addEventListener('click', () => {
+            showToast("SMTP Email Alert", "Test email dispatched to plant.operator@schneider.com", "success");
+            addAuditLog("EMAIL_DISPATCH", "Alert email sent to plant.operator@schneider.com", "SMTP Gateway", "SUCCESS");
+        });
+    }
+
+    const btnTestSMSAlert = document.getElementById('btnTestSMSAlert');
+    if (btnTestSMSAlert) {
+        btnTestSMSAlert.addEventListener('click', () => {
+            showToast("SMS Webhook", "Emergency SMS alert sent to Plant Manager mobile", "warning");
+            addAuditLog("SMS_DISPATCH", "Emergency SMS sent to +91 9876543210", "Twilio Gateway", "WARNING");
+        });
+    }
+
     // Sidebar Smooth Scrolling & Active State Highlight
     const navItems = document.querySelectorAll('.nav-item');
     navItems.forEach(item => {
@@ -110,6 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let activeScenario = 'NORMAL';
     let isSimulating = true;
     let timeIndex = 0;
+    let lastToastTime = 0;
     const telemetryHistory = [];
 
     // Sliders
@@ -153,16 +258,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     switchFan.addEventListener('change', () => {
         fanActive = switchFan.checked;
+        showToast("Relay State Changed", `Cooling Fan set to ${fanActive ? 'ON' : 'OFF'}`, fanActive ? "success" : "warning");
         addAuditLog("RELAY_ACTUATION", `Cooling Fan set to ${fanActive ? 'ON' : 'OFF'}`, "Edge Controller", fanActive ? "SUCCESS" : "WARNING");
     });
 
     switchHeater.addEventListener('change', () => {
         heaterActive = switchHeater.checked;
+        showToast("Relay State Changed", `Heating Element set to ${heaterActive ? 'ON' : 'OFF'}`, heaterActive ? "warning" : "info");
         addAuditLog("RELAY_ACTUATION", `Heating Element set to ${heaterActive ? 'ON' : 'OFF'}`, "Edge Controller", heaterActive ? "WARNING" : "INFO");
     });
 
     switchAlarm.addEventListener('change', () => {
         alarmActive = switchAlarm.checked;
+        showToast("Safety Alarm", `Alarm Siren set to ${alarmActive ? 'ON' : 'OFF'}`, alarmActive ? "danger" : "info");
         addAuditLog("RELAY_ACTUATION", `Alarm Siren set to ${alarmActive ? 'ON' : 'OFF'}`, "Safety System", alarmActive ? "CRITICAL" : "INFO");
     });
 
@@ -171,8 +279,8 @@ document.addEventListener('DOMContentLoaded', () => {
     btnAutoOptimize.addEventListener('click', () => {
         rangeProc.value = 54.5;
         updateAIPredictor();
+        showToast("AI Auto-Optimize", "Tuned Process Temp to 54.5°C (-16.5% Energy Savings)", "success");
         addAuditLog("AI_OPTIMIZER", "Tuned Process Temp to 54.5°C (-16.5% Energy)", "Scikit-Learn ML", "SUCCESS");
-        alert('AI Closed-Loop Optimizer Applied:\nProcess Temperature setpoint automatically tuned to 54.5°C.\nEstimated Power Reduction: 16.5% saved!');
     });
 
     // Scenario State Engine
@@ -182,6 +290,7 @@ document.addEventListener('DOMContentLoaded', () => {
             scenarioBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             activeScenario = btn.getAttribute('data-scenario');
+            showToast("Scenario Changed", `Preset switched to ${activeScenario}`, "info");
             addAuditLog("SCENARIO_CHANGE", `Preset switched to ${activeScenario}`, "User Dashboard", "INFO");
         });
     });
@@ -225,10 +334,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 1. Dynamic Actuator Physics Effects:
         if (fanActive && currentProcTemp > 45.0) {
-            currentProcTemp -= 0.4; // Cooling fan lowers temp
+            currentProcTemp -= 0.4;
         }
         if (heaterActive && currentProcTemp < 95.0) {
-            currentProcTemp += 0.8; // Heater raises temp
+            currentProcTemp += 0.8;
         }
 
         // 2. Scenario Adjustments:
@@ -341,10 +450,17 @@ document.addEventListener('DOMContentLoaded', () => {
         scadaChart.data.datasets[2].data.push(energy.toFixed(3));
         scadaChart.update();
 
-        // Automated Safety Interlock Check
+        // Automated Safety Interlock & Toast Notification Trigger
+        const nowMs = Date.now();
+        if (currentProcTemp > 78.0 && (nowMs - lastToastTime > 6000)) {
+            lastToastTime = nowMs;
+            showToast("High Temperature Alert", `Process Temp reached ${currentProcTemp.toFixed(1)}°C! Safety Interlock Active.`, "warning");
+        }
+
         if (currentProcTemp > 80.0 && !fanActive) {
             switchFan.checked = true;
             fanActive = true;
+            showToast("Safety Interlock", "Cooling Fan automatically triggered ON", "danger");
             addAuditLog("SAFETY_INTERLOCK", "Auto-Activated Cooling Fan due to High Temp (>80°C)", "Node-RED Safety Rule", "WARNING");
         }
 
@@ -372,6 +488,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+        showToast("Report Exported", "SCADA Audit Telemetry Log downloaded", "success");
         addAuditLog("CSV_EXPORT", "SCADA Audit Telemetry Log Exported to CSV", "User Dashboard", "SUCCESS");
     });
 
@@ -381,7 +498,7 @@ document.addEventListener('DOMContentLoaded', () => {
         heaterActive = false;
         switchFan.checked = false;
         switchHeater.checked = false;
+        showToast("EMERGENCY STOP", "E-STOP Triggered! All Industrial Relays Deactivated", "danger");
         addAuditLog("EMERGENCY_STOP", "E-STOP Triggered! All Relays Deactivated", "User Console", "CRITICAL");
-        alert('EMERGENCY STOP ACTIVATED!\nVirtual MQTT Event Published: SYSTEM_OFF, FAN_RELAY_OFF, HEATER_RELAY_OFF.');
     });
 });

@@ -12,6 +12,9 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- Floating Toast Notification Overlay Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
     <div class="app-container">
         <!-- Sidebar Navigation -->
         <aside class="sidebar">
@@ -31,6 +34,7 @@
                 <a href="#control" class="nav-item"><i class="fa-solid fa-sliders"></i> Edge Relay Control</a>
                 <a href="#roi-calculator" class="nav-item"><i class="fa-solid fa-calculator"></i> Sustainability ROI</a>
                 <a href="#maintenance" class="nav-item"><i class="fa-solid fa-gears"></i> Predictive Maintenance</a>
+                <a href="#notifications" class="nav-item"><i class="fa-solid fa-bell"></i> Alert Notifications</a>
                 <a href="#logs" class="nav-item"><i class="fa-solid fa-list-check"></i> SCADA Audit Logs</a>
             </nav>
 
@@ -61,6 +65,9 @@
                     <p>Open-Source IIoT Architecture • Schneider Electric Yuva Yodha Tech 2026</p>
                 </div>
                 <div class="header-actions">
+                    <button class="btn btn-icon" id="btnSoundToggle" title="Toggle Alarm Chime Sound">
+                        <i class="fa-solid fa-volume-high" id="soundIcon"></i>
+                    </button>
                     <button class="btn btn-accent" id="btnAutoOptimize">
                         <i class="fa-solid fa-wand-magic-sparkles"></i> AI Auto-Optimize Setpoint
                     </button>
@@ -222,6 +229,42 @@
                     </div>
                 </div>
             </div>
+
+            <!-- SCADA Notification Dispatch & Channels Section -->
+            <section class="panel notifications-panel" id="notifications">
+                <div class="panel-header">
+                    <h2><i class="fa-solid fa-bell"></i> Industrial Alert Notification Process & Channels</h2>
+                    <span class="badge badge-ai">Multi-Channel Dispatch</span>
+                </div>
+                <div class="notif-grid">
+                    <div class="notif-channel-card">
+                        <div class="channel-icon text-cyan"><i class="fa-solid fa-desktop"></i></div>
+                        <div class="channel-info">
+                            <h3>Browser & UI Toast Alerts</h3>
+                            <p>Real-time visual floating alerts & native desktop popups for critical thermal events.</p>
+                        </div>
+                        <button class="btn btn-outline btn-sm" id="btnEnableDesktopNotif">Enable Desktop Popups</button>
+                    </div>
+
+                    <div class="notif-channel-card">
+                        <div class="channel-icon text-green"><i class="fa-solid fa-envelope"></i></div>
+                        <div class="channel-info">
+                            <h3>Email Dispatch Webhook</h3>
+                            <p>Sends instant SMTP alerts to <code>plant.operator@schneider.com</code> on E-STOP or Overheat.</p>
+                        </div>
+                        <button class="btn btn-outline btn-sm" id="btnTestEmailAlert">Test Email Alert</button>
+                    </div>
+
+                    <div class="notif-channel-card">
+                        <div class="channel-icon text-amber"><i class="fa-solid fa-mobile-screen-button"></i></div>
+                        <div class="channel-info">
+                            <h3>SMS / Telegram Webhook</h3>
+                            <p>Emergency SMS & Telegram bot notifications dispatched to plant manager mobile devices.</p>
+                        </div>
+                        <button class="btn btn-outline btn-sm" id="btnTestSMSAlert">Test SMS Dispatch</button>
+                    </div>
+                </div>
+            </section>
 
             <!-- Architecture & Edge Control Grid -->
             <div class="content-grid bottom-grid">
